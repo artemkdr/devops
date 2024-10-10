@@ -1,3 +1,7 @@
+# Postgres image with initialization script.
+
+# This image runs the SQL script located at ./psqlinit/init.sql during startup to initialize the database.
+
 # Use the official PostgreSQL 15 image as a base
 FROM postgres:15
 
