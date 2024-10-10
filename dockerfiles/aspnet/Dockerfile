@@ -1,7 +1,5 @@
 # ASP.NET 6.0 image for building and running an API .NET application.
 
-# The .NET project should be located in the ./API directory.
-# The .NET solution file must be in the root directory.
 # This image replaces the $DB_CONNECTION_STRING placeholder in appsettings.json with the provided environment variable.
 
 # Build .NET API stage
@@ -23,15 +21,19 @@ RUN apt-get update && apt-get install -y gettext-base
 
 ARG PORT=5000
 ARG DB_CONNECTION_STRING=
+
 ENV PORT=${PORT}
 ENV DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
-COPY --from=build-api /app/api /app/api
-COPY /API/appsettings.json /tmp/appsettings.json
+
+COPY --from=build-api /app /app
+COPY /appsettings.json /tmp/appsettings.json
 
 # Substitute the DB_CONNECTION_STRING placeholder in appsettings.json with the environment variable value.
-RUN envsubst '$DB_CONNECTION_STRING' < /tmp/appsettings.json > /app/api/appsettings.json
-WORKDIR /app/api/
+RUN envsubst '$DB_CONNECTION_STRING' < /tmp/appsettings.json > /app/appsettings.json
+WORKDIR /app/
 
 EXPOSE ${PORT}
 
-ENTRYPOINT dotnet API.dll --urls http://*:${PORT}
+ENTRYPOINT dotnet run
+# Use this command if you want to run on the specific port
+#ENTRYPOINT dotnet ${SERVICE_NAME}.dll --urls http://*:${PORT}
