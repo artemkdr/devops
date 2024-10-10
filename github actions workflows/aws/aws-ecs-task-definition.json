@@ -1,0 +1,105 @@
+{
+    "family": "someservice-task-definition", 
+    "executionRoleArn": "arn:aws:iam::999999999999:role/AWSECSTasksRole",
+    "requiresCompatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "cpu": "256",
+    "memory": "512",
+    "networkMode": "awsvpc",     
+    "containerDefinitions": [
+        {
+            "name": "frontend",
+            "image": "999999999999.dkr.ecr.eu-central-1.amazonaws.com/someserviceclient:latest", 
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "API_HOST",
+                    "value": "localhost"
+                },
+                {
+                    "name": "API_PORT",
+                    "value": "5000"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/someservice-task-definition",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3
+            },
+            "systemControls": [],
+            "memory": 512,
+            "cpu": 128,
+            "essential": true,
+            "volumesFrom": [],
+            "mountPoints": []
+        },
+        {
+            "name": "backend",
+            "image": "999999999999.dkr.ecr.eu-central-1.amazonaws.com/someserviceclientapi:latest",
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "PORT",
+                    "value": "5000"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/someservice-task-definition",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },         
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:5000/health || exit 1"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3
+            },        
+            "systemControls": [],
+            "memory": 512,
+            "cpu": 128,
+            "essential": true,
+            "volumesFrom": [],
+            "mountPoints": []
+        }
+    ]
+}

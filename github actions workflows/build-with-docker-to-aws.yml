@@ -1,0 +1,88 @@
+name: Build, Push to ECR and Deploy to ECS
+
+on: 
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      backend-dockerfile:
+        type: string
+        default: "Dockerfile.api"
+      backend-docker-args:
+        type: string
+        default: "--build arg PORT=5000"
+      frontend-dockerfile:
+        type: string
+        default: "Dockerfile.client"
+      fontend-docker-args:
+        type: string
+        default: "--build-arg API_HOST=localhost --build-arg API_PORT=5000"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Prepare credentials for AWS ECR login action
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+      
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2        
+      
+      # Build and Push backend image
+      - name: "backend: Build and push image to ECR"        
+        id: build-backend-image
+        env:          
+          ECR_REGISTRY: ${{ vars.AWS_ECR }}
+          ECR_REPOSITORY: ${{ vars.AWS_REPO }}
+          IMAGE_TAG: ${{ github.sha }}          
+        run: |
+          docker build ${{ inputs.frontend-docker-args }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . -f ${{ inputs.backend-dockerfile }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+      
+      # Build and Push frontend image      
+      - name: "frontend: Build and push image to ECR"
+        id: build-frontend-image
+        env:
+          ECR_REGISTRY: ${{ vars.AWS_ECR }}
+          ECR_REPOSITORY: ${{ vars.AWS_REPO }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build ${{ inputs.frontend-docker-args }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . -f ${{ inputs.frontend-dockerfile }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def-client
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: aws-ecs-task-definition.json
+          container-name: frontend
+          image: ${{ steps.build-client-image.outputs.image }}
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def-api
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-client.outputs.task-definition }}
+          container-name: backend
+          image: ${{ steps.build-api-image.outputs.image }}
+
+      # Deploy to ECS (Using Docker Compose)
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def-api.outputs.task-definition }}
+          service: TestService
+          cluster: TestServiceCluster
+          #wait-for-service-stability: true
+     
+     
