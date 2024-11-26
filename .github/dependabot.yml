@@ -5,11 +5,14 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/github actions workflows" # Location of package manifests
+  - package-ecosystem: "github-actions" # See documentation for possible values    
+    directories:
+      - "/github actions workflows/*"
+      - "/github actions workflows/**/*"
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/dockerfiles" # Location of package manifests
+    directories:
+      - "/dockerfiles/**/*"
     schedule:
       interval: "weekly"
