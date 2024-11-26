@@ -3,7 +3,7 @@
 # This image runs the SQL script located at ./psqlinit/init.sql during startup to initialize the database.
 
 # Use the official PostgreSQL 15 image as a base
-FROM postgres:15
+FROM postgres:17
 
 # Copy the script for creating databases
 COPY ./psqlinit/init.sql /docker-entrypoint-initdb.d/
