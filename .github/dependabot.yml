@@ -9,3 +9,7 @@ updates:
     directory: "/github actions workflows" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "docker" # See documentation for possible values
+    directory: "/dockerfiles" # Location of package manifests
+    schedule:
+      interval: "weekly"
