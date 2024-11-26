@@ -78,7 +78,7 @@ jobs:
 
       # Deploy to ECS (Using Docker Compose)
       - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: ${{ steps.task-def-api.outputs.task-definition }}
           service: TestService
