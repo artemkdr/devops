@@ -4,7 +4,7 @@
 # This configuration assumes that nginx.conf includes a reverse proxy section for /api to forward requests to the API service.
 
 # Build client stage
-FROM node:18-alpine AS build-client 
+FROM node:23-alpine AS build-client 
 WORKDIR /app
 
 COPY package.json package-lock.json ./ 
