@@ -10,9 +10,9 @@ updates:
       - "/github actions workflows/*"
       - "/github actions workflows/**/*"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
   - package-ecosystem: "docker" # See documentation for possible values
     directories:
       - "/dockerfiles/**/*"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
