@@ -23,7 +23,7 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
     steps:
       - uses: actions/checkout@v4            # Check out the repository code
-      - uses: actions/setup-node@v4         # Set up Node.js environment
+      - uses: actions/setup-node@v5         # Set up Node.js environment
         with:
           node-version: ${{ inputs.node-version }}            # Specify Node.js version
           cache: 'npm'                       # Cache npm dependencies for speed
