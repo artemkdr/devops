@@ -3,7 +3,7 @@
 # This image replaces the $DB_CONNECTION_STRING placeholder in appsettings.json with the provided environment variable.
 
 # Build .NET API stage
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-api
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-api
 WORKDIR /app
 COPY API .
 RUN dotnet restore
